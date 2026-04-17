@@ -7,6 +7,7 @@ const NFTs = lazy(() => import("@/pages/NFTs"));
 const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const DeFiHub = lazy(() => import("@/pages/DeFiHub"));
 const Gameplay = lazy(() => import("@/pages/Gameplay"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Whitepaper = lazy(() => import("@/pages/Whitepaper"));
@@ -30,6 +31,7 @@ export const routePaths = {
   marketplace: "/marketplace",
   defihub: "/defihub",
   gameplay: "/gameplay",
+  dashboard: "/dashboard",
   terms: "/terms",
   privacy: "/privacy",
   whitepaper: "/whitepaper",

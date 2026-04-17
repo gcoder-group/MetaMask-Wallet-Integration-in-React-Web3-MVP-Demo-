@@ -7,6 +7,7 @@ import metamaskIcon from "@/assets/metamask-icon.png";
 import walletConnectIcon from "@/assets/walletconnect-icon.png";
 import coinbaseIcon from "@/assets/coinbase-icon.png";
 import trustWalletIcon from "@/assets/trustwallet-icon.png";
+import Metamask from "./wallets/Metamask";
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
@@ -17,12 +18,14 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
   const [step, setStep] = useState<"select" | "password">("select");
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [password, setPassword] = useState("");
+  const [loadingBtn, setLoadingBtn] = useState<string | null>(null);
 
   const wallets = [
     {
       name: "MetaMask",
       icon: metamaskIcon,
       description: "Connect with MetaMask wallet",
+      comp: Metamask,
     },
     {
       name: "WalletConnect",
@@ -42,13 +45,13 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
   ];
 
   const handleWalletConnect = (walletName: string) => {
+    console.log(`Selected wallet: ${walletName}`);
     setSelectedWallet(walletName);
     setStep("password");
   };
 
   const handleFinalConnect = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(`Connecting to ${selectedWallet} with password...`);
     // Reset state and close
     setStep("select");
     setSelectedWallet(null);
@@ -60,6 +63,10 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
     setStep("select");
     setSelectedWallet(null);
     setPassword("");
+  };
+
+  const handleLoadingBtn = (message: string | null) => {
+    setLoadingBtn(message);
   };
 
   return (
@@ -117,32 +124,49 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
                     exit={{ opacity: 0, x: 20 }}
                     className="space-y-3"
                   >
-                    {wallets.map((wallet, index) => (
-                      <motion.button
-                        key={wallet.name}
-                        onClick={() => handleWalletConnect(wallet.name)}
-                        className="w-full bg-muted/50 hover:bg-muted border border-primary/10 hover:border-primary/30 rounded-xl p-4 transition-all duration-200 flex items-center space-x-4"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <img 
-                          src={wallet.icon} 
-                          alt={wallet.name}
-                          className="w-12 h-12 object-contain"
-                        />
-                        <div className="text-left flex-1">
-                          <div className="font-semibold text-foreground">
-                            {wallet.name}
+                    {wallets.map((wallet, index) => {
+                      if (wallet.name === "MetaMask") {
+                        return (
+                          <wallet.comp
+                            key={wallet.name}
+                            loadingBtn={loadingBtn}
+                            handleLoadingBtn={handleLoadingBtn}
+                            onClose={onClose}
+                          />
+                        );
+                      }
+                      return (
+                        <motion.button
+                          key={wallet.name}
+                          onClick={() => handleWalletConnect(wallet.name)}
+                          className={`w-full bg-muted/50 hover:bg-muted border border-primary/10 hover:border-primary/30 rounded-xl p-4 transition-all duration-200 flex items-center space-x-4 ${
+                            loadingBtn ? "!opacity-50 pointer-events-none" : ""
+                          }`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0 * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          disabled={loadingBtn === "connect"}
+                        >
+                          <img
+                            src={wallet.icon}
+                            alt={wallet.name}
+                            className="w-12 h-12 object-contain"
+                          />
+                          <div className="text-left flex-1">
+                            <div className="font-semibold text-foreground">
+                              {wallet.name}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {loadingBtn === "connect"
+                                ? "Pending..."
+                                : wallet.description}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {wallet.description}
-                          </div>
-                        </div>
-                      </motion.button>
-                    ))}
+                        </motion.button>
+                      );
+                    })}
                   </motion.div>
                 ) : (
                   <motion.form
@@ -154,13 +178,15 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
                     className="space-y-6"
                   >
                     <div className="flex items-center justify-center p-4 bg-muted/30 rounded-xl mb-6">
-                      <img 
-                        src={wallets.find(w => w.name === selectedWallet)?.icon} 
+                      <img
+                        src={
+                          wallets.find((w) => w.name === selectedWallet)?.icon
+                        }
                         alt={selectedWallet || ""}
                         className="w-16 h-16 object-contain"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-1">
                         <Lock size={14} />
@@ -177,7 +203,7 @@ const ConnectWalletModal = ({ isOpen, onClose }: ConnectWalletModalProps) => {
                       />
                     </div>
 
-                    <Button 
+                    <Button
                       type="submit"
                       className="w-full h-12 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground glow-primary font-semibold"
                     >
